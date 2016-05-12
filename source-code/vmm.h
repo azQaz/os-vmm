@@ -1,44 +1,8 @@
 #ifndef VMM_H
 #define VMM_H
 
-#ifndef DEBUG
-#define DEBUG
-#endif
-#undef DEBUG
-
-
-/* 模拟辅存的文件路径 */
-#define AUXILIARY_MEMORY "vmm_auxMem"
-
-/* 页面大小（字节）*/
-#define PAGE_SIZE 4
-/* 虚存空间大小（字节） */
-#define VIRTUAL_MEMORY_SIZE (64 * 4)
-/* 实存空间大小（字节） */ 
-#define ACTUAL_MEMORY_SIZE (32 * 4)
-/* 总虚页数 */
-#define PAGE_SUM (VIRTUAL_MEMORY_SIZE / PAGE_SIZE)
-/* 总物理块数 */
-#define BLOCK_SUM (ACTUAL_MEMORY_SIZE / PAGE_SIZE)
-
-
-/* 可读标识位 */
-#define READABLE 0x01u
-/* 可写标识位 */
-#define WRITABLE 0x02u
-/* 可执行标识位 */
-#define EXECUTABLE 0x04u
-
-
-
-/* 定义字节类型 */
-#define BYTE unsigned char
-
-typedef enum {
-	TRUE = 1, FALSE = 0
-} BOOL;
-
-
+#include "global.h"
+#include <stdio.h>
 
 /* 页表项 */
 typedef struct
@@ -68,22 +32,9 @@ typedef struct
 } MemoryAccessRequest, *Ptr_MemoryAccessRequest;
 
 
-/* 访存错误代码 */
-typedef enum {
-	ERROR_READ_DENY, //该页不可读
-	ERROR_WRITE_DENY, //该页不可写
-	ERROR_EXECUTE_DENY, //该页不可执行
-	ERROR_INVALID_REQUEST, //非法请求类型
-	ERROR_OVER_BOUNDARY, //地址越界
-	ERROR_FILE_OPEN_FAILED, //文件打开失败
-	ERROR_FILE_CLOSE_FAILED, //文件关闭失败
-	ERROR_FILE_SEEK_FAILED, //文件指针定位失败
-	ERROR_FILE_READ_FAILED, //文件读取失败
-	ERROR_FILE_WRITE_FAILED //文件写入失败
-} ERROR_CODE;
-
-/* 产生访存请求 */
-void do_request();
+/* 随即产生访存请求 */
+void do_request_rand();
+int do_request();
 
 /* 响应访存请求 */
 void do_response();
@@ -95,10 +46,10 @@ void do_page_fault(Ptr_PageTableItem);
 void do_LFU(Ptr_PageTableItem);
 
 /* 装入页面 */
-void do_page_in(Ptr_PageTableItem, unsigned in);
-
-/* 写出页面 */
-void do_page_out(Ptr_PageTableItem);
+//void do_page_in(Ptr_PageTableItem, unsigned in);
+//
+///* 写出页面 */
+//void do_page_out(Ptr_PageTableItem);
 
 /* 错误处理 */
 void do_error(ERROR_CODE);
@@ -109,5 +60,14 @@ void do_print_info();
 /* 获取页面保护类型字符串 */
 char *get_proType_str(char *, BYTE);
 
+void load_page(ushort block_num, FILE* file, ulong offset);
+void store_page(ushort block_num, FILE* file ,ulong offset);
 
+pid_t get_pid_by_block_num(ushort block_num);
+ushort get_vpage(ushort block_num);
+void age(ushort block_num);
+ulong64 get_age(ushort block_num);
+/* 设置块所属pid，指向虚页号，同时age清零 */
+void set_mm_ctrl(ushort block_num, pid_t pid, ushort vpage);
+void do_init_mm();
 #endif
