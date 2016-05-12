@@ -23,7 +23,7 @@ Ptr_MemoryAccessRequest ptr_memAccReq;
 pid_t get_pid_by_block_num(ushort block_num)
 {
 	return mmg.items[block_num].pid;
-
+}
 
 ushort get_vpage(ushort block_num)
 {
